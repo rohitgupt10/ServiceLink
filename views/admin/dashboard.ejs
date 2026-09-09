@@ -1,0 +1,10 @@
+<div class="admin-page-heading"><div><p class="eyebrow">Marketplace snapshot</p><h1>Overview</h1><p>Monitor ServiceLink without sorting through every management tool at once.</p></div><span class="status-pill status-active">System active</span></div>
+<section class="admin-stat-grid">
+  <% [['Users', stats.users, '/admin/users'],['Providers', stats.providers, '/admin/verifications'],['Services', stats.services, '/admin/services'],['Bookings', stats.bookings, '/admin/bookings'],['Open disputes', stats.openDisputes, '/admin/disputes'],['Reviews', stats.reviews, '/admin/reviews'],['Paid orders', stats.payments, '/admin/payments']].forEach(([label,value,href]) => { %>
+    <a href="<%= href %>" class="admin-stat-card"><span><%= label %></span><strong><%= value %></strong><small>View records →</small></a>
+  <% }) %>
+</section>
+<div class="admin-grid-two">
+  <section class="admin-panel"><div class="panel-heading"><div><h2>Recent bookings</h2><p>Latest marketplace requests</p></div><a href="/admin/bookings">View all</a></div><div class="admin-list"><% if (!recentBookings.length) { %><p class="empty-row">No bookings yet.</p><% } %><% recentBookings.forEach(item => { %><div><span><strong><%= item.service ? item.service.title : 'Removed service' %></strong><small><%= item.user ? item.user.name : 'Unknown customer' %></small></span><span class="status-pill status-<%= item.status %>"><%= item.status %></span></div><% }) %></div></section>
+  <section class="admin-panel"><div class="panel-heading"><div><h2>Dispute queue</h2><p>Cases needing attention</p></div><a href="/admin/disputes">Open queue</a></div><div class="admin-list"><% if (!recentDisputes.length) { %><p class="empty-row">No disputes yet.</p><% } %><% recentDisputes.forEach(item => { %><div><span><strong><%= item.title %></strong><small><%= item.initiatedBy ? item.initiatedBy.name : 'Unknown user' %></small></span><span class="status-pill status-<%= item.status %>"><%= item.status.replace('_',' ') %></span></div><% }) %></div></section>
+</div>

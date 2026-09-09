@@ -21,6 +21,18 @@ const bookingSchema = new mongoose.Schema({
     min: 1,
     max: 24
   },
+  priceAtBooking: {
+    type: Number,
+    required: true,
+    default: 0,
+    min: 0,
+  },
+  totalPrice: {
+    type: Number,
+    required: true,
+    default: 0,
+    min: 0,
+  },
   status: {
     type: String,
     enum: ['pending', 'confirmed', 'cancelled', 'complete'],
@@ -33,7 +45,19 @@ const bookingSchema = new mongoose.Schema({
   providerCompleted: {
     type: Boolean,
     default: false
+  },
+  paymentStatus: {
+    type: String,
+    enum: ['unpaid', 'paid', 'refunded'],
+    default: 'unpaid'
+  },
+  payment: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Payment',
+    default: null
   }
 }, { timestamps: true });
+
+bookingSchema.index({ user: 1, service: 1, date: 1 });
 
 module.exports = mongoose.model('Booking', bookingSchema);

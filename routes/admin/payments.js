@@ -1,0 +1,10 @@
+const express = require("express");
+const Booking = require("../../models/Booking");
+const Notification = require("../../models/Notification");
+const Payment = require("../../models/Payment");
+const { recalculateProvider } = require("../../lib/metrics");
+const { isObjectId } = require("../../lib/validation");
+const router = express.Router();
+router.get("/", async (req, res) => { const payments = await Payment.find().populate("customer", "name email").populate("provider", "name email").populate({ path: "booking", populate: { path: "service", select: "title" } }).sort({ createdAt: -1 }).limit(200); res.render("admin/payments", { pageTitle: "Payments", payments }); });
+router.post("/:id/refund", async (req, res) => { if (isObjectId(req.params.id)) { const payment = await Payment.findOne({ _id: req.params.id, status: "paid" }); if (payment) { payment.status = "refunded"; payment.refundedAt = new Date(); await payment.save(); await Booking.findByIdAndUpdate(payment.booking, { paymentStatus: "refunded" }); await Notification.create({ user: payment.customer, type: "payment_refunded", title: "Demo payment refunded", message: `A demo refund of Rs.${payment.amount.toFixed(2)} was recorded.`, relatedBooking: payment.booking }); await recalculateProvider(payment.provider); } } res.redirect("/admin/payments?notice=Refund+processed"); });
+module.exports = router;

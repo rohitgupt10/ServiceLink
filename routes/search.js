@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const Service = require("../models/Service");
+const { parsePositiveNumber, safeText } = require("../lib/validation");
 
 // Advanced search with filters
 router.get("/search", async (req, res) => {
@@ -15,13 +16,15 @@ router.get("/search", async (req, res) => {
       page = 1,
     } = req.query;
     const limit = 12;
-    const skip = (page - 1) * limit;
+    const currentPage = Math.floor(parsePositiveNumber(page, { min: 1, max: 10000 }) || 1);
+    const skip = (currentPage - 1) * limit;
 
-    let filter = { isActive: true };
+    let filter = { isActive: true, deletedAt: null };
 
     // Text search
-    if (query) {
-      filter.$text = { $search: query };
+    const cleanedQuery = safeText(query || "", { min: 0, max: 100 });
+    if (cleanedQuery) {
+      filter.$text = { $search: cleanedQuery };
     }
 
     // Category filter
@@ -30,16 +33,19 @@ router.get("/search", async (req, res) => {
     }
 
     // Price range filter
-    if (minPrice) {
-      filter.price = { ...filter.price, $gte: parseFloat(minPrice) };
+    const parsedMin = minPrice ? parsePositiveNumber(minPrice, { min: 0, max: 10000000 }) : null;
+    const parsedMax = maxPrice ? parsePositiveNumber(maxPrice, { min: 0, max: 10000000 }) : null;
+    if (parsedMin !== null) {
+      filter.price = { ...filter.price, $gte: parsedMin };
     }
-    if (maxPrice) {
-      filter.price = { ...filter.price, $lte: parseFloat(maxPrice) };
+    if (parsedMax !== null) {
+      filter.price = { ...filter.price, $lte: parsedMax };
     }
 
     // Rating filter
-    if (rating) {
-      filter.averageRating = { $gte: parseFloat(rating) };
+    const parsedRating = rating ? parsePositiveNumber(rating, { min: 1, max: 5 }) : null;
+    if (parsedRating !== null) {
+      filter.averageRating = { $gte: parsedRating };
     }
 
     // Sorting
@@ -65,7 +71,7 @@ router.get("/search", async (req, res) => {
 
     res.json({
       services,
-      currentPage: parseInt(page),
+      currentPage,
       totalPages,
       totalCount,
       success: true,
@@ -81,7 +87,7 @@ router.get("/search", async (req, res) => {
 // Get trending services
 router.get("/trending", async (req, res) => {
   try {
-    const trending = await Service.find({ isActive: true })
+    const trending = await Service.find({ isActive: true, deletedAt: null })
       .populate("provider", "name avatar averageRating")
       .sort({ viewCount: -1 })
       .limit(8);
@@ -99,6 +105,7 @@ router.get("/top-rated", async (req, res) => {
   try {
     const topRated = await Service.find({
       isActive: true,
+      deletedAt: null,
       totalReviews: { $gt: 0 },
     })
       .populate("provider", "name avatar averageRating")

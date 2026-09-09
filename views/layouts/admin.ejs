@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="csrf-token" content="<%= csrfToken %>">
+  <title><%= pageTitle || 'Admin' %> · ServiceLink</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Merienda:wght@600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="/css/output.css" rel="stylesheet">
+</head>
+<body class="admin-body">
+  <header class="admin-topbar">
+    <a href="/admin" class="admin-brand">ServiceLink <span>Admin</span></a>
+    <div class="admin-account"><span class="session-mode mode-admin"><span></span>Admin mode</span><span><%= user.name %></span><a href="/">View marketplace</a><form action="/auth/logout" method="POST"><input type="hidden" name="_csrf" value="<%= csrfToken %>"><button>Sign out</button></form></div>
+  </header>
+  <%- include('../partials/admin-sidebar') %>
+  <main class="admin-main">
+    <% if (adminNotice) { %><div class="notice-success"><%= adminNotice %></div><% } %>
+    <%- body %>
+  </main>
+  <script src="/js/main.js"></script>
+</body>
+</html>

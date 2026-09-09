@@ -74,6 +74,7 @@
 </div>
 
 <script>
+  const escapeSearch = value => String(value ?? '').replace(/[&<>'"]/g, char => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[char]));
 let currentPage = 1;
 
 async function performSearch(page = 1) {
@@ -93,10 +94,10 @@ async function performSearch(page = 1) {
       data.services.forEach(service => {
         const html = `
           <div class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
-            <img src="${service.thumbnail}" alt="${service.title}" class="w-full h-48 object-cover">
+            <img src="${escapeSearch(service.thumbnail)}" alt="${escapeSearch(service.title)}" class="w-full h-48 object-cover">
             <div class="p-4">
-              <h3 class="font-bold text-lg mb-2">${service.title}</h3>
-              <p class="text-gray-600 text-sm mb-2">${service.description.substring(0, 100)}...</p>
+              <h3 class="font-bold text-lg mb-2">${escapeSearch(service.title)}</h3>
+              <p class="text-gray-600 text-sm mb-2">${escapeSearch(service.description.substring(0, 100))}...</p>
               <div class="flex justify-between items-center mb-2">
                 <span class="text-lg font-bold text-indigo-600">$${service.price}</span>
                 <span class="text-yellow-500">⭐ ${service.averageRating.toFixed(1)}</span>

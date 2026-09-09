@@ -1,0 +1,10 @@
+<aside class="admin-sidebar">
+  <p class="admin-nav-label">Workspace</p>
+  <% const links = [['/admin','Overview','⌂'],['/admin/users','Users','◎'],['/admin/services','Services','◇'],['/admin/bookings','Bookings','▣'],['/admin/payments','Payments','¤'],['/admin/disputes','Disputes','!'],['/admin/categories','Categories','#'],['/admin/reviews','Reviews','★'],['/admin/verifications','Verification','✓']]; %>
+  <nav class="admin-nav">
+    <% links.forEach(([href,label,icon]) => { const active = href === '/admin' ? currentAdminPath === href : currentAdminPath.startsWith(href); %>
+      <a href="<%= href %>" class="<%= active ? 'active' : '' %>"><span><%= icon %></span><%= label %></a>
+    <% }) %>
+  </nav>
+  <div class="admin-sidebar-help"><strong>MVP control centre</strong><p>Review marketplace activity from focused, independent sections.</p></div>
+</aside>

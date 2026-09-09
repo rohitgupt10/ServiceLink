@@ -1,0 +1,16 @@
+<div class="max-w-3xl mx-auto bg-white rounded-xl shadow-md p-6">
+  <h1 class="text-2xl font-bold mb-5">Edit service</h1>
+  <% if (error) { %><p class="bg-red-100 text-red-800 p-3 rounded mb-4"><%= error %></p><% } %>
+  <form action="/services/<%= service._id %>/edit" method="POST" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+    <label class="block">Title<input class="w-full border rounded p-2 mt-1" name="title" value="<%= service.title %>" required maxlength="120"></label>
+    <label class="block">Category<select class="w-full border rounded p-2 mt-1" name="category" required><% categories.forEach(category => { %><option value="<%= category %>" <%= category === service.category ? 'selected' : '' %>><%= category %></option><% }) %></select></label>
+    <label class="block md:col-span-2">Description<textarea class="w-full border rounded p-2 mt-1" name="description" required maxlength="2000" rows="5"><%= service.description %></textarea></label>
+    <label class="block">Price (Rs./hour)<input class="w-full border rounded p-2 mt-1" type="number" name="price" value="<%= service.price %>" min="1" required></label>
+    <label class="block">Location<input class="w-full border rounded p-2 mt-1" name="location" value="<%= service.location %>" required></label>
+    <label class="block">Contact<input class="w-full border rounded p-2 mt-1" name="contact" value="<%= service.contact %>" required></label>
+    <label class="block">New thumbnail image URL<input class="w-full border rounded p-2 mt-1" type="url" name="thumbnail" value="" placeholder="https://..."><span class="text-xs text-gray-500">Leave empty to keep the current locally stored image.</span></label>
+    <label class="block md:col-span-2">Tags, comma-separated<input class="w-full border rounded p-2 mt-1" name="tags" value="<%= service.tags.join(', ') %>"></label>
+    <div class="md:col-span-2 flex gap-3"><button class="bg-indigo-600 text-white px-5 py-2 rounded">Save changes</button><a href="/services" class="border px-5 py-2 rounded">Cancel</a></div>
+  </form>
+</div>

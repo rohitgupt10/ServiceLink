@@ -1,0 +1,10 @@
+const express = require("express");
+const Service = require("../../models/Service");
+const { notifyServiceUnavailable } = require("../../lib/notification-events");
+const { isObjectId } = require("../../lib/validation");
+const router = express.Router();
+router.get("/", async (req, res) => res.render("admin/services", { pageTitle: "Services", services: await Service.find().populate("provider", "name email isVerified").sort({ createdAt: -1 }).limit(200) }));
+router.post("/:id/toggle", async (req, res) => { if (isObjectId(req.params.id)) { const service = await Service.findById(req.params.id); if (service && !service.deletedAt) { service.isActive = !service.isActive; service.updatedAt = new Date(); await service.save(); if (!service.isActive) await notifyServiceUnavailable(service, `${service.title} was paused by an administrator.`); } } res.redirect("/admin/services?notice=Service+status+updated"); });
+router.post("/:id/delete", async (req, res) => { if (isObjectId(req.params.id)) { const service = await Service.findByIdAndUpdate(req.params.id, { isActive: false, deletedAt: new Date(), updatedAt: new Date() }, { new: true }); if (service) await notifyServiceUnavailable(service, `${service.title} was removed by an administrator.`); } res.redirect("/admin/services?notice=Service+removed"); });
+router.post("/:id/restore", async (req, res) => { if (isObjectId(req.params.id)) await Service.findOneAndUpdate({ _id: req.params.id, deletedAt: { $ne: null } }, { deletedAt: null, isActive: false, updatedAt: new Date() }); res.redirect("/admin/services?notice=Service+restored+in+paused+state"); });
+module.exports = router;

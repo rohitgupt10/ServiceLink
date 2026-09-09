@@ -1,182 +1,53 @@
-<div class="container mx-auto px-4 py-8">
-    <div class="flex justify-between items-center mb-6">
-        <h2 class="text-3xl font-bold text-gray-800">Available Services</h2>
-    </div>
-    <div class="flex justify-between items-center mb-6">
-        <% if (user && user.role === 'provider') { %>
-            <a href="/services/add" class="bg-indigo-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-indigo-700 transition-colors shadow-md">
-                Add New Service
-            </a>
-        <% } %>
-    </div>
-    <% if (error) { %>
-        <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-6" role="alert">
-            <p><%= error %></p>
+<div class="catalog-shell reference-catalog">
+  <div class="catalog-title">
+    <h1><%= user && user.role === 'provider' ? 'MANAGE SERVICES' : 'OUR SERVICES' %></h1>
+    <span class="h-line"></span>
+    <p><%= user && user.role === 'provider' ? 'Create and maintain the services you offer.' : 'Browse reliable professionals and book the right help for your needs.' %></p>
+  </div>
+
+  <div class="catalog-toolbar">
+    <div class="breadcrumb"><a href="/">Home</a><span>›</span><strong>Services</strong></div>
+    <span><%= services.length %> result<%= services.length === 1 ? '' : 's' %><%= query ? ` for “${query}”` : '' %></span>
+    <% if (user && user.role === 'provider') { %><a href="/services/add" class="custom-bg catalog-add">Add service</a><% } %>
+  </div>
+
+  <div class="catalog-layout">
+    <aside class="filter-card reference-filter">
+      <h2>FILTER SERVICES</h2>
+      <form method="GET">
+        <label>Search<input name="q" value="<%= query || '' %>" placeholder="What do you need?"></label>
+        <label>Category<select name="category"><option value="">All categories</option><% categories.forEach(category => { %><option value="<%= category %>" <%= selectedCategory === category ? 'selected' : '' %>><%= category %></option><% }) %></select></label>
+        <button class="custom-bg">Apply filters</button>
+        <a href="/services" class="clear-filter">Clear all filters</a>
+      </form>
+      <div class="filter-note"><strong>Book confidently</strong><p>Verified badges and ratings come from real ServiceLink activity.</p></div>
+    </aside>
+
+    <section class="catalog-results">
+      <% if (error) { %><div class="notice-error"><%= error %></div><% } %>
+      <% if (!services.length) { %><div class="empty-state"><span>⌕</span><h2>No services found</h2><p>Try a broader search or clear the category filter.</p><a href="/services" class="admin-primary">Clear filters</a></div><% } else { %>
+        <div class="catalog-list">
+          <% services.forEach(service => { %>
+            <article class="service-list-card">
+              <a href="/services/<%= service._id %>" class="service-list-image"><img src="<%= service.thumbnail %>" alt="<%= service.title %>"><% if (!service.isActive) { %><b>Paused</b><% } %></a>
+              <div class="service-list-copy">
+                <h2><a href="/services/<%= service._id %>"><%= service.title %></a></h2>
+                <p><%= service.description %></p>
+                <div class="listing-group"><h3>Category</h3><span><%= service.category %></span></div>
+                <div class="listing-group"><h3>Provider</h3><span><%= service.provider.isVerified ? '✓ Verified · ' : '' %><%= service.provider.name %></span></div>
+                <div class="listing-group"><h3>Location</h3><span><%= service.location %></span></div>
+              </div>
+              <div class="service-list-book">
+                <strong>Rs.<%= service.price.toFixed(0) %> <small>per hour</small></strong>
+                <div class="service-rating">★ <%= service.averageRating.toFixed(1) %> <small>(<%= service.totalReviews %>)</small></div>
+                <% if (user && user.role === 'user') { %><button type="button" class="favorite-btn" data-service-id="<%= service._id %>" data-favorited="<%= favoriteIds.includes(service._id.toString()) %>"><%= favoriteIds.includes(service._id.toString()) ? '♥ Saved' : '♡ Save' %></button><% } %>
+                <a class="custom-bg" href="/services/<%= service._id %>"><%= user && user.role === 'provider' ? 'Manage' : 'Book now' %></a>
+                <a class="outline-action" href="/services/<%= service._id %>">More details</a>
+              </div>
+            </article>
+          <% }) %>
         </div>
-    <% } %>
-    <!-- Search and Filter -->
-    <div class="mb-8">
-        <form action="/services" method="GET" class="flex items-center space-x-4">
-            <input type="text" name="q" value="<%= query || '' %>" placeholder="Search for services..."
-                class="w-2/4 px-4 py-3 rounded-lg border-gray-300 focus:ring-indigo-500 focus:border-indigo-500">
-            <select name="category" class="px-4 py-3 rounded-lg border-gray-300 focus:ring-indigo-500 focus:border-indigo-500">
-                <option value="">All Categories</option>
-                <% categories.forEach(category => { %>
-                    <option value="<%= category %>" <%= selectedCategory === category ? 'selected' : '' %>>
-                        <%= category %>
-                    </option>
-                <% }) %>
-            </select>
-            <button type="submit" class="bg-indigo-600 text-white px-6 py-3 rounded-lg hover:bg-indigo-700">Filter</button>
-        </form>
-    </div>
-
-    <% if (services.length === 0) { %>
-        <div class="text-center py-16">
-            <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"
-                aria-hidden="true">
-                <path vector-effect="non-scaling-stroke" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                    d="M9 13h6m-3-3v6m-9 1V7a2 2 0 012-2h12a2 2 0 012 2v10a2 2 0 01-2 2H4a2 2 0 01-2-2z" />
-            </svg>
-            <h3 class="mt-2 text-sm font-medium text-gray-900">No services available</h3>
-            <p class="mt-1 text-sm text-gray-500">Try adjusting your search or filter.</p>
-        </div>
-    <% } else { %>
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            <% services.forEach(service => { %>
-                <div class="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300">
-                    <img class="h-48 w-full object-cover"
-                        src="https://placehold.co/600x400/E0E7FF/4F46E5?text=<%= service.title.replace(' ', '+') %>"
-                        alt="<%= service.title %>">
-                    <div class="p-6">
-                        <div class="flex items-baseline justify-between">
-                            <span
-                                class="inline-block bg-indigo-100 text-indigo-800 text-xs px-2 rounded-full uppercase font-semibold tracking-wide">
-                                <%= service.location %>
-                            </span>
-                            <span
-                                class="inline-block bg-gray-200 text-gray-800 text-xs px-2 rounded-full uppercase font-semibold tracking-wide">
-                                <%= service.category %>
-                            </span>
-                        </div>
-                        <h4 class="mt-2 font-bold text-xl leading-tight truncate">
-                            <a href="/services/<%= service._id %>" class="hover:underline"><%= service.title %></a>
-                        </h4>
-                        <div class="mt-1">
-                            <p class="description line-clamp-2 mb-2 text-gray-600 text-sm" id="desc-<%= service.id %>">
-                                <%= service.description %>
-                            </p>
-                            <button type="button" class="view-more-btn text-blue-600 hover:underline"
-                                data-id="<%= service.id %>">View More</button>
-                        </div>
-                        <div class="mt-2">
-                            <span class="text-2xl font-bold text-gray-900">Rs.<%= service.price %></span>
-                            <span class="text-sm text-gray-600">/hr</span>
-                        </div>
-                        <div class="mt-2 flex items-center">
-                            <span class="text-yellow-500">
-                                <%= '★'.repeat(Math.round(service.averageRating)) %><%= '☆'.repeat(5 - Math.round(service.averageRating)) %>
-                            </span>
-                            <span class="ml-2 text-sm text-gray-600"><%= service.averageRating.toFixed(1) %> / 5</span>
-                        </div>
-                        <p class="text-sm text-gray-600 mt-2">Provider: <%= service.provider.name %></p>
-                        <p class="text-sm text-gray-600">Contact: <%= service.contact %></p>
-
-                        <div class="mt-4 flex space-x-2">
-                            <% if (user && user.role === 'user') { %>
-                                <a href="/services/<%= service._id %>"
-                                    class="flex-1 text-center bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600">
-                                    Review
-                                </a>
-                                <!-- Trigger modal -->
-                                <button type="button"
-                                    onclick="openBookingModal('<%= service._id %>');"
-                                    class="flex-1 text-center bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600">
-                                    Book Now
-                                </button>
-                            <% } %>
-
-                            <% if (user && user.role === 'provider' && user.id === service.provider._id.toString()) { %>
-                                <form action="/services/<%= service._id %>/delete" method="POST" class="w-full">
-                                    <button type="submit"
-                                        class="w-full bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-700"
-                                        onclick="return confirm('Are you sure you want to delete this service?');">
-                                        Delete
-                                    </button>
-                                </form>
-                            <% } %>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Booking Modal -->
-                <div id="booking-modal-<%= service._id %>"
-                    class="hidden fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center z-50">
-                    <div class="bg-white rounded-xl shadow-lg p-6 w-full max-w-md relative">
-                        <button type="button" onclick="closeBookingModal('<%= service._id %>');"
-                            class="absolute top-2 right-2 text-gray-500 hover:text-gray-800">✖</button>
-                        <h2 class="text-2xl font-bold mb-4">Book Service: <%= service.title %></h2>
-                        <form action="/bookings/create" method="POST">
-                            <input type="hidden" name="serviceId" value="<%= service._id %>">
-
-                            <label for="date-<%= service._id %>" class="block text-sm font-medium text-gray-700">Select a Date</label>
-                            <input type="date" id="date-<%= service._id %>" name="date" required
-                                class="w-full px-4 py-2 border rounded-lg mb-3">
-
-                            <label for="hours-<%= service._id %>" class="block text-sm font-medium text-gray-700">Number of Hours</label>
-                            <input type="number" id="hours-<%= service._id %>" name="hours" min="1" max="8" required placeholder="1-8 hr"
-                                class="w-full px-4 py-2 border rounded-lg mb-3">
-
-                            <button type="submit"
-                                class="w-full bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700">
-                                Confirm Booking
-                            </button>
-                        </form>
-                    </div>
-                </div>
-            <% }) %>
-        </div>
-    <% } %>
+      <% } %>
+    </section>
+  </div>
 </div>
-
-<script>
-    // Toggle description visibility
-    document.querySelectorAll('.view-more-btn').forEach(button => {
-        button.addEventListener('click', () => {
-            const serviceId = button.getAttribute('data-id');
-            const description = document.getElementById(`desc-${serviceId}`);
-            const isExpanded = description.classList.contains('line-clamp-none');
-
-            if (isExpanded) {
-                description.classList.remove('line-clamp-none');
-                description.classList.add('line-clamp-2');
-                button.textContent = 'View More';
-            } else {
-                description.classList.remove('line-clamp-2');
-                description.classList.add('line-clamp-none');
-                button.textContent = 'View Less';
-            }
-        });
-    });
-
-    function openBookingModal(serviceId) {
-        document.getElementById(`booking-modal-${serviceId}`).classList.remove('hidden');
-    }
-    function closeBookingModal(serviceId) {
-        document.getElementById(`booking-modal-${serviceId}`).classList.add('hidden');
-    }
-
-    document.addEventListener('DOMContentLoaded', function() {
-            // Get all date input fields
-            const dateInputs = document.querySelectorAll('input[type="date"]');
-            
-            // Get today's date in YYYY-MM-DD format
-            const today = new Date();
-            const todayString = today.toISOString().split('T')[0];
-            
-            // Set min attribute for each date input
-            dateInputs.forEach(input => {
-                input.min = todayString;
-            });
-        });
-</script>

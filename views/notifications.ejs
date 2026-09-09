@@ -82,6 +82,7 @@
 <script>
   let allNotifications = [];
   let currentFilter = "all";
+  const escapeNotification = value => String(value ?? "").replace(/[&<>'"]/g, char => ({"&":"&amp;","<":"&lt;",">":"&gt;","'":"&#39;",'"':"&quot;"}[char]));
 
   async function loadNotifications() {
     try {
@@ -117,10 +118,10 @@
         (notif) => `
     <div class="notification-item ${notif.read ? "read" : "unread"}">
       <div class="flex justify-between items-start mb-2">
-        <h4 class="font-semibold text-gray-800">${notif.title}</h4>
+        <h4 class="font-semibold text-gray-800">${escapeNotification(notif.title)}</h4>
         <small class="text-gray-500">${new Date(notif.createdAt).toLocaleDateString()}</small>
       </div>
-      <p class="text-gray-700 mb-3">${notif.message}</p>
+      <p class="text-gray-700 mb-3">${escapeNotification(notif.message)}</p>
       <div class="flex gap-2 text-sm">
         ${!notif.read ? `<button class="mark-read-btn text-blue-600 hover:underline" data-id="${notif._id}">Mark as Read</button>` : ""}
         <button class="delete-btn text-red-600 hover:underline" data-id="${notif._id}">Delete</button>

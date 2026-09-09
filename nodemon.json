@@ -1,0 +1,21 @@
+{
+  "watch": [
+    "server.js",
+    "scripts",
+    "lib",
+    "models",
+    "routes",
+    "services",
+    "views",
+    "public/js",
+    "public/css/input.css",
+    "package.json"
+  ],
+  "ext": "js,json,ejs,css",
+  "ignore": [
+    ".local-data/**",
+    "node_modules/**",
+    "public/uploads/**",
+    "public/images/**"
+  ]
+}

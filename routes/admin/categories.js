@@ -1,0 +1,10 @@
+const express = require("express");
+const Category = require("../../models/Category");
+const Service = require("../../models/Service");
+const { isObjectId, safeText } = require("../../lib/validation");
+const router = express.Router();
+router.get("/", async (req, res) => res.render("admin/categories", { pageTitle: "Categories", categories: await Category.find().sort({ name: 1 }) }));
+router.post("/", async (req, res) => { const name = safeText(req.body.name, { min: 2, max: 80 }); if (name) await Category.updateOne({ name }, { $set: { isActive: true }, $setOnInsert: { name } }, { upsert: true }); res.redirect("/admin/categories?notice=Category+saved"); });
+router.post("/:id/toggle", async (req, res) => { if (isObjectId(req.params.id)) { const category = await Category.findById(req.params.id); if (category) { category.isActive = !category.isActive; await category.save(); } } res.redirect("/admin/categories?notice=Category+status+updated"); });
+router.post("/:id/delete", async (req, res) => { if (isObjectId(req.params.id)) { const category = await Category.findById(req.params.id); if (category && !(await Service.exists({ category: category.name, deletedAt: null }))) await category.deleteOne(); } res.redirect("/admin/categories?notice=Category+removal+processed"); });
+module.exports = router;

@@ -2,6 +2,7 @@ require("dotenv").config();
 const mongoose = require("mongoose");
 const Service = require("./models/Service");
 const User = require("./models/User");
+const { cacheRemoteImage } = require("./lib/images");
 
 const providerIds = [
   "68b3194bc6c9e8de2895f53e",
@@ -217,7 +218,15 @@ async function seedServices() {
     );
   }
 
-  const operations = services.map(({ providerIndex, ...service }) => ({
+  const locallyStoredServices = [];
+  for (const service of services) {
+    locallyStoredServices.push({
+      ...service,
+      thumbnail: await cacheRemoteImage(service.thumbnail, { folder: "services", prefix: `seed-${service.title}`, permanent: true }),
+    });
+  }
+
+  const operations = locallyStoredServices.map(({ providerIndex, ...service }) => ({
     updateOne: {
       filter: {
         title: service.title,

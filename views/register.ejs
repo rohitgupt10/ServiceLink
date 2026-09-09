@@ -1,139 +1,29 @@
-<div class="max-w-md mx-auto bg-white p-6 rounded-lg shadow-md">
-  <h2 class="text-2xl font-bold text-slate-900 text-center mb-6">Join ServiceLink</h2>
-  <% if (typeof error !== 'undefined' && error) { %>
-    <p class="text-red-500 mb-4"><%= error %></p>
-  <% } %>
-  <form action="/auth/register" method="POST">
-    <div class="mb-4">
-      <label for="name" class="block text-sm font-medium">Full Name</label>
-      <input type="text" id="name" name="name" class="w-full px-3 py-2 border rounded-lg" required>
-    </div>
-    <div class="mb-4">
-      <label for="email" class="block text-sm font-medium">Email Address</label>
-      <input type="email" id="email" name="email" class="w-full px-3 py-2 border rounded-lg" required>
-    </div>
-    <div class="mb-4">
-      <label for="contact" class="block text-sm font-medium text-slate-700">Phone Number</label>
-      <div class="mt-1 flex space-x-2">
-        <input id="contact" name="contact" type="tel" autocomplete="tel" max="10" required class="w-full px-3 py-2 border rounded-lg">
-      </div>
-    </div>
-    <div class="mb-4 relative">
-      <label for="password" class="block text-sm font-medium">Password</label>
-      <div class="relative">
-      <input type="password" id="password" name="password" class="w-full px-3 py-2 border rounded-lg pr-10" required>
-      <button type="button" id="togglePassword" class="absolute inset-y-0 right-0 px-3 flex items-center text-slate-500 hover:text-slate-700">
-        <svg id="eyeIcon" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-            d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-            d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-        </svg>
-     </button>
-    </div>
-    <div class="mb-4 relative">
-  <label for="confirmPassword" class="block text-sm font-medium">Confirm Password</label>
-  <div class="relative">
-    <input type="password" id="confirmPassword" name="confirmPassword" class="w-full px-3 py-2 border rounded-lg pr-10" required>
-    <button type="button" id="toggleConfirmPassword" class="absolute inset-y-0 right-0 px-3 flex items-center text-slate-500 hover:text-slate-700">
-      <svg id="eyeIconConfirm" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-          d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-          d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-      </svg>
-    </button>
+<section class="auth-shell">
+  <div class="auth-card auth-card-wide">
+    <div class="auth-heading"><p>Create an account</p><h1>JOIN SERVICELINK</h1><span class="h-line"></span></div>
+    <% if (error) { %><div class="notice-error"><%= error %></div><% } %>
+    <form action="/auth/register" method="POST" enctype="multipart/form-data" id="registerForm" class="auth-form auth-form-grid">
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+      <label>Full name<input type="text" name="name" minlength="2" maxlength="100" required></label>
+      <label>Email address<input type="email" name="email" required></label>
+      <label>Phone number<input type="tel" name="contact" minlength="5" maxlength="30" required></label>
+      <label>Account type<select name="role" required><option value="">Select an option</option><option value="user">Service seeker</option><option value="provider">Service provider</option></select></label>
+      <label class="avatar-upload-field">Profile image <span class="avatar-upload-control"><img id="avatarPreview" src="/images/default-avatar.svg" alt="Profile image preview"><span><input type="file" id="avatar" name="avatar" accept="image/jpeg,image/png,image/webp,image/gif"><small>Optional · JPG, PNG, WEBP or GIF · maximum 5 MB</small></span></span></label>
+      <label>Password<input type="password" id="password" name="password" minlength="8" required></label>
+      <label>Confirm password<input type="password" id="confirmPassword" name="confirmPassword" minlength="8" required><span id="passwordError" class="hidden form-error">Passwords do not match.</span></label>
+      <button class="custom-bg auth-submit auth-grid-submit">Register</button>
+    </form>
+    <p class="auth-switch">Already have an account? <a href="/auth/login">Login here</a></p>
   </div>
-  <p id="passwordError" class="text-red-500 text-sm mt-1 hidden">Passwords do not match</p>
-</div>
-  </div>
-    <div class="mb-4">
-      <label for="role" class="block text-sm font-medium">Role</label>
-      <select id="role" name="role" class="w-full p-3 border border-slate-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500 text-slate-700">
-        <option value="">Select an option</option>
-        <option value="user">Service Seeker</option>
-        <option value="provider">Service Provider</option>
-      </select>
-    </div>
-    <button type="submit" class="w-full bg-indigo-600 text-white p-3 rounded-md font-semibold hover:bg-indigo-700 transition-colors shadow-md">Register</button>
-  </form>
-  <p class="mt-6 text-center text-sm text-slate-600">
-    Already have an account? <a href="/auth/login" class="font-medium text-indigo-600 hover:text-indigo-800">Login Here</a>
-  </p>
-</div>
+</section>
 <script>
-  document.addEventListener('DOMContentLoaded', () => {
-    const countryCodeSelect = document.getElementById('country-code');
-    const phoneNumberInput = document.getElementById('contact');
-
-    // Set initial selection
-    countryCodeSelect.value = '+977';
-
-    // Update phone number input when country code changes
-    function handleCountryCodeChange() {
-      const selectedCode = countryCodeSelect.value;
-      const currentNumber = phoneNumberInput.value.replace(/^\+\d+/, '') || '';
-      phoneNumberInput.value = selectedCode + currentNumber;
-    }
-
-    // Update dropdown when phone number input changes
-    function handlePhoneNumberInput() {
-      const phoneNumber = phoneNumberInput.value;
-      const matchedCode = countryCodes.find(country => phoneNumber.startsWith(country.code));
-      if (matchedCode) {
-        countryCodeSelect.value = matchedCode.code;
-      } else {
-        console.warn('No matching country code found for:', phoneNumber);
-        // Keep current selection for better UX
-      }
-    }
-
-    // Add event listeners
-    countryCodeSelect.addEventListener('change', handleCountryCodeChange);
-    phoneNumberInput.addEventListener('input', handlePhoneNumberInput);
-
-    // Initialize phone number input
-    handleCountryCodeChange();
+  document.getElementById('registerForm').addEventListener('submit', (event) => {
+    const matches = document.getElementById('password').value === document.getElementById('confirmPassword').value;
+    document.getElementById('passwordError').classList.toggle('hidden', matches);
+    if (!matches) event.preventDefault();
   });
-
-
-  // confirm password
-  document.addEventListener('DOMContentLoaded', () => {
-    const passwordInput = document.getElementById('password');
-    const confirmPasswordInput = document.getElementById('confirmPassword');
-    const togglePasswordBtn = document.getElementById('togglePassword');
-    const toggleConfirmPasswordBtn = document.getElementById('toggleConfirmPassword');
-    const eyeIcon = document.getElementById('eyeIcon');
-    const eyeIconConfirm = document.getElementById('eyeIconConfirm');
-    const passwordError = document.getElementById('passwordError');
-    const form = document.querySelector('form');
-
-    // Toggle Password Visibility
-    function toggleVisibility(input, icon) {
-      const isPassword = input.type === 'password';
-      input.type = isPassword ? 'text' : 'password';
-      icon.innerHTML = isPassword
-        ? `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-              d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.542-7a9.956 9.956 0 012.478-4.043M9.88 9.88a3 3 0 104.24 4.24" />
-           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-              d="M3 3l18 18" />`
-        : `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-              d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-              d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />`;
-    }
-
-    togglePasswordBtn.addEventListener('click', () => toggleVisibility(passwordInput, eyeIcon));
-    toggleConfirmPasswordBtn.addEventListener('click', () => toggleVisibility(confirmPasswordInput, eyeIconConfirm));
-
-    // Check password match on form submit
-    form.addEventListener('submit', (e) => {
-      if (passwordInput.value !== confirmPasswordInput.value) {
-        e.preventDefault();
-        passwordError.classList.remove('hidden');
-      } else {
-        passwordError.classList.add('hidden');
-      }
-    });
+  document.getElementById('avatar').addEventListener('change', (event) => {
+    const file = event.target.files[0];
+    if (file) document.getElementById('avatarPreview').src = URL.createObjectURL(file);
   });
 </script>

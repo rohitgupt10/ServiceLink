@@ -16,6 +16,7 @@ const userSchema = new mongoose.Schema({
     required: true,
     unique: true,
     trim: true,
+    lowercase: true,
   },
   password: {
     type: String,
@@ -23,7 +24,7 @@ const userSchema = new mongoose.Schema({
   },
   role: {
     type: String,
-    enum: ["user", "provider"],
+    enum: ["user", "provider", "admin"],
     default: "user",
   },
   bio: {
@@ -33,11 +34,15 @@ const userSchema = new mongoose.Schema({
   },
   avatar: {
     type: String,
-    default: "https://via.placeholder.com/150",
+    default: "/images/default-avatar.svg",
   },
   isVerified: {
     type: Boolean,
     default: false,
+  },
+  isActive: {
+    type: Boolean,
+    default: true,
   },
   totalReviews: {
     type: Number,

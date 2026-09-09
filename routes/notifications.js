@@ -1,104 +1,38 @@
 const express = require("express");
-const router = express.Router();
 const Notification = require("../models/Notification");
+const { requireAuth } = require("../lib/auth");
+const { isObjectId } = require("../lib/validation");
 
-// Middleware to check if user is logged in
-function isLoggedIn(req, res, next) {
-  if (req.session.user && req.session.user.id) {
-    next();
-  } else {
-    res.status(401).json({ message: "Please log in first" });
-  }
-}
+const router = express.Router();
 
-// Get all notifications for user
-router.get("/all", isLoggedIn, async (req, res) => {
-  try {
-    const notifications = await Notification.find({ user: req.session.user.id })
-      .sort({ createdAt: -1 })
-      .limit(50);
-
-    const unreadCount = await Notification.countDocuments({
-      user: req.session.user.id,
-      read: false,
-    });
-
-    res.json({ notifications, unreadCount, success: true });
-  } catch (err) {
-    res
-      .status(500)
-      .json({ message: "Error fetching notifications", success: false });
-  }
+router.get("/all", requireAuth, async (req, res) => {
+  const notifications = await Notification.find({ user: req.session.user.id }).sort({ createdAt: -1 }).limit(50);
+  const unreadCount = notifications.filter((notification) => !notification.read).length;
+  res.json({ notifications, unreadCount, success: true });
 });
 
-// Get unread notifications
-router.get("/unread", isLoggedIn, async (req, res) => {
-  try {
-    const unreadNotifications = await Notification.find({
-      user: req.session.user.id,
-      read: false,
-    }).sort({ createdAt: -1 });
-
-    res.json({ notifications: unreadNotifications, success: true });
-  } catch (err) {
-    res
-      .status(500)
-      .json({ message: "Error fetching unread notifications", success: false });
-  }
+router.get("/unread", requireAuth, async (req, res) => {
+  const notifications = await Notification.find({ user: req.session.user.id, read: false }).sort({ createdAt: -1 }).limit(50);
+  res.json({ notifications, success: true });
 });
 
-// Mark notification as read
-router.put("/:notificationId/read", isLoggedIn, async (req, res) => {
-  try {
-    await Notification.findByIdAndUpdate(req.params.notificationId, {
-      read: true,
-    });
-    res.json({ message: "Notification marked as read", success: true });
-  } catch (err) {
-    res
-      .status(500)
-      .json({ message: "Error updating notification", success: false });
-  }
+router.put("/mark-all-read", requireAuth, async (req, res) => {
+  await Notification.updateMany({ user: req.session.user.id, read: false }, { read: true });
+  res.json({ message: "All notifications marked as read", success: true });
 });
 
-// Mark all notifications as read
-router.put("/mark-all-read", isLoggedIn, async (req, res) => {
-  try {
-    await Notification.updateMany(
-      { user: req.session.user.id, read: false },
-      { read: true },
-    );
-    res.json({ message: "All notifications marked as read", success: true });
-  } catch (err) {
-    res
-      .status(500)
-      .json({ message: "Error updating notifications", success: false });
-  }
+router.put("/:notificationId/read", requireAuth, async (req, res) => {
+  if (!isObjectId(req.params.notificationId)) return res.status(404).json({ success: false, message: "Notification not found." });
+  const notification = await Notification.findOneAndUpdate({ _id: req.params.notificationId, user: req.session.user.id }, { read: true });
+  if (!notification) return res.status(404).json({ success: false, message: "Notification not found." });
+  res.json({ message: "Notification marked as read", success: true });
 });
 
-// Delete notification
-router.delete("/:notificationId", isLoggedIn, async (req, res) => {
-  try {
-    await Notification.findByIdAndDelete(req.params.notificationId);
-    res.json({ message: "Notification deleted", success: true });
-  } catch (err) {
-    res
-      .status(500)
-      .json({ message: "Error deleting notification", success: false });
-  }
-});
-
-// Create notification (for internal use)
-router.post("/create", async (req, res) => {
-  try {
-    const notification = new Notification(req.body);
-    await notification.save();
-    res.json({ notification, success: true });
-  } catch (err) {
-    res
-      .status(500)
-      .json({ message: "Error creating notification", success: false });
-  }
+router.delete("/:notificationId", requireAuth, async (req, res) => {
+  if (!isObjectId(req.params.notificationId)) return res.status(404).json({ success: false, message: "Notification not found." });
+  const notification = await Notification.findOneAndDelete({ _id: req.params.notificationId, user: req.session.user.id });
+  if (!notification) return res.status(404).json({ success: false, message: "Notification not found." });
+  res.json({ message: "Notification deleted", success: true });
 });
 
 module.exports = router;

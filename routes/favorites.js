@@ -1,90 +1,34 @@
 const express = require("express");
-const router = express.Router();
 const Favorite = require("../models/Favorite");
 const Service = require("../models/Service");
+const { requireCustomer } = require("../lib/auth");
+const { isObjectId } = require("../lib/validation");
 
-// Middleware to check if user is logged in
-function isLoggedIn(req, res, next) {
-  if (req.session.user && req.session.user.id) {
-    next();
-  } else {
-    res.status(401).json({ message: "Please log in first" });
-  }
-}
+const router = express.Router();
 
-// Add to favorites
-router.post("/add", isLoggedIn, async (req, res) => {
+router.post("/add", requireCustomer, async (req, res) => {
   try {
-    const { serviceId } = req.body;
-
-    const favorite = new Favorite({
-      user: req.session.user.id,
-      service: serviceId,
-    });
-
-    await favorite.save();
+    if (!isObjectId(req.body.serviceId) || !(await Service.exists({ _id: req.body.serviceId, isActive: true, deletedAt: null }))) return res.status(404).json({ success: false, message: "Service not found." });
+    await Favorite.updateOne({ user: req.session.user.id, service: req.body.serviceId }, { $setOnInsert: { createdAt: new Date() } }, { upsert: true });
     res.json({ message: "Added to favorites", success: true });
-  } catch (err) {
-    if (err.code === 11000) {
-      res.status(400).json({ message: "Already in favorites", success: false });
-    } else {
-      res
-        .status(500)
-        .json({ message: "Error adding to favorites", success: false });
-    }
+  } catch {
+    res.status(500).json({ message: "Error adding to favorites", success: false });
   }
 });
 
-// Remove from favorites
-router.post("/remove", isLoggedIn, async (req, res) => {
-  try {
-    const { serviceId } = req.body;
-
-    await Favorite.findOneAndDelete({
-      user: req.session.user.id,
-      service: serviceId,
-    });
-
-    res.json({ message: "Removed from favorites", success: true });
-  } catch (err) {
-    res
-      .status(500)
-      .json({ message: "Error removing from favorites", success: false });
-  }
+router.post("/remove", requireCustomer, async (req, res) => {
+  if (isObjectId(req.body.serviceId)) await Favorite.findOneAndDelete({ user: req.session.user.id, service: req.body.serviceId });
+  res.json({ message: "Removed from favorites", success: true });
 });
 
-// Get user's favorite services
-router.get("/my-favorites", isLoggedIn, async (req, res) => {
-  try {
-    const favorites = await Favorite.find({ user: req.session.user.id })
-      .populate({
-        path: "service",
-        populate: { path: "provider", select: "name avatar averageRating" },
-      })
-      .sort({ createdAt: -1 });
-
-    res.json({ favorites, success: true });
-  } catch (err) {
-    res
-      .status(500)
-      .json({ message: "Error fetching favorites", success: false });
-  }
+router.get("/my-favorites", requireCustomer, async (req, res) => {
+  const favorites = await Favorite.find({ user: req.session.user.id }).populate({ path: "service", match: { deletedAt: null }, populate: { path: "provider", select: "name avatar averageRating" } }).sort({ createdAt: -1 });
+  res.json({ favorites: favorites.filter((favorite) => favorite.service), success: true });
 });
 
-// Check if service is favorited
-router.get("/is-favorited/:serviceId", isLoggedIn, async (req, res) => {
-  try {
-    const favorite = await Favorite.findOne({
-      user: req.session.user.id,
-      service: req.params.serviceId,
-    });
-
-    res.json({ isFavorited: !!favorite });
-  } catch (err) {
-    res
-      .status(500)
-      .json({ message: "Error checking favorite status", success: false });
-  }
+router.get("/is-favorited/:serviceId", requireCustomer, async (req, res) => {
+  const favorite = isObjectId(req.params.serviceId) && await Favorite.exists({ user: req.session.user.id, service: req.params.serviceId });
+  res.json({ isFavorited: !!favorite, success: true });
 });
 
 module.exports = router;

@@ -5,10 +5,20 @@
   <% } %>
   <% if (user && user.role === 'provider') { %>
     <form action="/services" method="POST" class="mb-6">
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
 
       <div class="mb-4">
         <label for="title" class="block text-sm font-medium text-gray-700">Service Title</label>
         <input type="text" id="title" name="title" class="w-full px-3 py-2 border rounded-lg" placeholder="e.g., Tutor, Plumber, Electrician" required>
+      </div>
+      <div class="mb-4">
+        <label for="thumbnail" class="block text-sm font-medium text-gray-700">Thumbnail image URL</label>
+        <input type="url" id="thumbnail" name="thumbnail" class="w-full px-3 py-2 border rounded-lg" placeholder="https://example.com/image.jpg">
+        <p class="text-xs text-gray-500 mt-1">ServiceLink downloads this image into local storage so it remains available.</p>
+      </div>
+      <div class="mb-4">
+        <label for="tags" class="block text-sm font-medium text-gray-700">Tags</label>
+        <input type="text" id="tags" name="tags" class="w-full px-3 py-2 border rounded-lg" placeholder="urgent, home, weekend">
       </div>
       <div class="mb-4">
         <label for="category" class="block text-sm font-medium text-gray-700">Category</label>

@@ -1,80 +1,33 @@
-  <header class="site-header text-white sticky top-0 z-50">
-    <nav class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="flex h-14 justify-between">
-        <div class="flex items-center">
-          <a href="/" class="brand-mark text-2xl font-bold"><span>+</span> ServiceLink</a>
+<header class="site-header sticky top-0 z-50">
+  <nav class="site-nav" aria-label="Main navigation">
+    <a href="/" class="brand-mark">ServiceLink</a>
+    <div class="desktop-nav">
+      <a href="/" class="nav-link">Home</a>
+      <a href="/services" class="nav-link">Services</a>
+      <a href="/#categories" class="nav-link">Categories</a>
+      <a href="/#how-it-works" class="nav-link">How it works</a>
+      <% if (user && user.role !== 'admin') { %><a href="/bookings" class="nav-link">Bookings</a><% } %>
+      <% if (user && user.role === 'user') { %><a href="/favorites" class="nav-link">Saved</a><% } %>
+    </div>
+    <div class="nav-actions">
+      <% if (!user) { %>
+        <a href="/auth/login" class="nav-outline">Login</a>
+        <a href="/auth/register" class="nav-outline">Register</a>
+      <% } else { %>
+        <% const notificationCount = typeof unreadNotificationCount === 'number' ? unreadNotificationCount : 0; %>
+        <% const modeLabel = user.role === 'provider' ? 'Provider mode' : user.role === 'admin' ? 'Admin mode' : 'User mode'; %>
+        <span class="session-mode mode-<%= user.role %>"><span></span><%= modeLabel %></span>
+        <a href="/notifications" class="notification-link" aria-label="Notifications">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+          <% if (notificationCount) { %><span><%= notificationCount > 9 ? '9+' : notificationCount %></span><% } %>
+        </a>
+        <div class="nav-dropdown account-dropdown">
+          <button class="account-button" type="button" aria-label="Open account menu"><img src="<%= user.avatar %>" alt=""><span><%= user.name.split(' ')[0] %></span><small>⌄</small></button>
+          <div class="nav-menu account-menu"><a href="<%= user.role === 'admin' ? '/admin' : user.role === 'provider' ? '/profile/dashboard/provider' : '/dashboard' %>">Dashboard</a><% if (user.role !== 'admin') { %><a href="/profile/<%= user.id %>">Profile</a><a href="/disputes">Disputes</a><% } %><form action="/auth/logout" method="POST"><input type="hidden" name="_csrf" value="<%= csrfToken %>"><button>Sign out</button></form></div>
         </div>
-        <div class="hidden md:flex items-center space-x-6">
-          <a href="/" class="nav-link">Home</a>
-          
-          <!-- Services Dropdown -->
-          <div class="relative group">
-              <a href="/services" class="nav-link flex items-center">
-              Services
-            </a>
-            <!-- Dropdown Menu -->
-            <div class="absolute left-0 mt-2 w-48 bg-white text-slate-800 rounded-lg shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
-              <% if (navCategories && navCategories.length > 0) { %>
-                <% navCategories.forEach(category => { %>
-                  <a href="/services?category=<%= encodeURIComponent(category) %>" class="block px-4 py-2 hover:bg-indigo-100 hover:text-indigo-700"><%= category %></a>
-                <% }); %>
-              <% } %>
-              <a href="/advanced-search" class="block px-4 py-2 font-bold border-t border-slate-200 hover:bg-indigo-100 hover:text-indigo-700">Advanced Search</a>
-            </div>
-          </div>
-
-          <% if (user) { %>
-            <a href="/bookings" class="nav-link">Bookings</a>
-            <a href="/favorites" class="nav-link">Favorites</a>
-            <a href="/notifications" class="nav-link">Notifications</a>
-            <a href="/disputes" class="nav-link">Disputes</a>
-            
-            <!-- Profile Dropdown -->
-            <div class="relative group">
-              <a href="/profile/<%= user.id %>" class="nav-link">Profile</a>
-              <div class="absolute right-0 mt-2 w-48 bg-white text-slate-800 rounded-lg shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
-                <a href="/profile/<%= user.id %>" class="block px-4 py-2 hover:bg-indigo-100 hover:text-indigo-700">My Profile</a>
-                <a href="/dashboard" class="block px-4 py-2 hover:bg-indigo-100 hover:text-indigo-700">Dashboard</a>
-                <a href="/auth/logout" class="block px-4 py-2 border-t border-slate-200 hover:bg-indigo-100 hover:text-indigo-700">Logout</a>
-              </div>
-            </div>
-          <% } else { %>
-            <a href="/auth/login" class="nav-link">Sign up / Login</a>
-          <% } %>
-        </div>
-        <!-- Mobile Menu Button -->
-        <div class="md:hidden flex items-center">
-          <button id="mobile-menu-button" class="text-white hover:text-indigo-200 focus:outline-none">
-            <span class="text-2xl">☰</span>
-          </button>
-        </div>
-      </div>
-      <!-- Mobile Menu -->
-      <div id="mobile-menu" class="md:hidden hidden">
-        <div class="px-2 pt-2 pb-3 space-y-1 bg-slate-900">
-          <a href="/" class="block px-3 py-2 text-white hover:bg-indigo-800 rounded-md">Home</a>
-          <a href="/advanced-search" class="block px-3 py-2 text-white hover:bg-indigo-800 rounded-md">Advanced Search</a>
-          <a href="/services" class="block px-3 py-2 text-white hover:bg-indigo-800 rounded-md">Services</a>
-          <% if (user) { %>
-            <a href="/bookings" class="block px-3 py-2 text-white hover:bg-indigo-800 rounded-md">Bookings</a>
-            <a href="/favorites" class="block px-3 py-2 text-white hover:bg-indigo-800 rounded-md">❤️ Favorites</a>
-            <a href="/notifications" class="block px-3 py-2 text-white hover:bg-indigo-800 rounded-md">🔔 Notifications</a>
-            <a href="/disputes" class="block px-3 py-2 text-white hover:bg-indigo-800 rounded-md">Disputes</a>
-            <a href="/profile/<%= user.id %>" class="block px-3 py-2 text-white hover:bg-indigo-800 rounded-md">👤 Profile</a>
-            <a href="/dashboard" class="block px-3 py-2 text-white hover:bg-indigo-800 rounded-md">Dashboard</a>
-            <a href="/auth/logout" class="block px-3 py-2 text-white hover:bg-indigo-800 rounded-md">Logout</a>
-          <% } else { %>
-            <a href="/auth/login" class="block px-3 py-2 text-white hover:bg-indigo-800 rounded-md">Login</a>
-            <a href="/auth/register" class="block px-3 py-2 text-white hover:bg-indigo-800 rounded-md">Register</a>
-          <% } %>
-        </div>
-      </div>
-    </nav>
-  </header>
-  <script>
-    // Toggle mobile menu
-    document.getElementById('mobile-menu-button').addEventListener('click', function () {
-      const mobileMenu = document.getElementById('mobile-menu');
-      mobileMenu.classList.toggle('hidden');
-    });
-  </script>
+      <% } %>
+      <button id="mobile-menu-button" class="mobile-menu-button" type="button" aria-label="Open navigation" aria-expanded="false">☰</button>
+    </div>
+  </nav>
+  <div id="mobile-menu" class="mobile-menu hidden"><% if (user) { %><p class="mobile-mode"><%= user.role === 'provider' ? 'Provider mode' : user.role === 'admin' ? 'Admin mode' : 'User mode' %></p><% } %><a href="/">Home</a><a href="/services">Services</a><a href="/#categories">Categories</a><a href="/#how-it-works">How it works</a><% if (user && user.role !== 'admin') { %><a href="/bookings">Bookings</a><% } %><% if (user && user.role === 'user') { %><a href="/favorites">Saved services</a><% } %><% if (user && user.role === 'admin') { %><a href="/admin">Admin dashboard</a><% } %></div>
+</header>

@@ -3,20 +3,20 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>ServiceLink</title>
+    <title><%= typeof pageTitle !== 'undefined' && pageTitle ? pageTitle + ' · ServiceLink' : 'ServiceLink · Local services, trusted people' %></title>
+    <meta name="csrf-token" content="<%= csrfToken %>" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Merienda:wght@600;700&family=Poppins:wght@400;500;600;700&display=swap"
       rel="stylesheet"
     />
     <link href="/css/output.css" rel="stylesheet" />
   </head>
   <body class="flex flex-col min-h-screen">
     <%- include('../partials/header') %>
-    <main class="content-shell flex-1 py-8 md:py-12">
+    <main class="flex-1">
       <%- body %>
-      <!-- Changed from <%= body %> -->
     </main>
     <%- include('../partials/footer') %>
     <script src="/js/main.js"></script>

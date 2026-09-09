@@ -54,11 +54,10 @@
         </div>
       </div>
     </div>
-    <!-- Logout Button -->
-    <div class="text-center">
-      <a href="/auth/logout" class="inline-block bg-red-600 text-white px-10 py-3 rounded-xl font-semibold text-base hover:bg-red-700 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1">
-        <i class="fas fa-sign-out-alt mr-2"></i> Logout
-      </a>
+    <div class="text-center flex justify-center gap-3">
+      <a href="/profile/<%= user.id %>" class="inline-block bg-indigo-600 text-white px-7 py-3 rounded-xl font-semibold">Edit profile</a>
+      <% if (user.role === 'provider') { %><a href="/profile/dashboard/provider" class="inline-block bg-green-600 text-white px-7 py-3 rounded-xl font-semibold">Provider analytics</a><% } %>
+      <form action="/auth/logout" method="POST"><input type="hidden" name="_csrf" value="<%= csrfToken %>"><button class="bg-red-600 text-white px-7 py-3 rounded-xl font-semibold">Logout</button></form>
     </div>
   </div>
 </main>

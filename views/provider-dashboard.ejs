@@ -1,0 +1,12 @@
+<div class="max-w-7xl mx-auto">
+  <div class="flex justify-between items-center mb-6"><div><h1 class="text-3xl font-bold">Provider dashboard</h1><p class="text-gray-600">Performance for <%= provider.name %></p></div><a href="/services/add" class="bg-indigo-600 text-white px-4 py-2 rounded">Add service</a></div>
+  <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+    <% [['Services', stats.totalServices], ['Bookings', stats.totalBookings], ['Completion', stats.completionRate + '%'], ['Earnings', 'Rs.' + stats.totalEarnings.toFixed(2)], ['Rating', stats.averageRating.toFixed(1)], ['Reviews', stats.totalReviews], ['Completed', stats.completedBookings], ['Active', stats.activeServices]].forEach(item => { %>
+      <div class="bg-white rounded-lg shadow-sm border p-4"><p class="text-gray-500 text-sm"><%= item[0] %></p><p class="text-2xl font-bold"><%= item[1] %></p></div>
+    <% }) %>
+  </div>
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <section class="bg-white rounded-lg shadow-sm border p-5"><h2 class="text-xl font-bold mb-4">Services</h2><div class="space-y-3"><% services.forEach(service => { %><div class="flex justify-between border-b pb-3"><div><p class="font-semibold"><%= service.title %></p><p class="text-sm text-gray-500"><%= service.isActive ? 'Active' : 'Paused' %> · <%= service.totalReviews %> reviews</p></div><a href="/services/<%= service._id %>/edit" class="text-indigo-600">Edit</a></div><% }) %></div></section>
+    <section class="bg-white rounded-lg shadow-sm border p-5"><h2 class="text-xl font-bold mb-4">Recent reviews</h2><div class="space-y-3"><% if (!recentReviews.length) { %><p class="text-gray-500">No reviews yet.</p><% } %><% recentReviews.forEach(review => { %><div class="border-b pb-3"><p class="font-semibold"><%= review.user.name %> · <%= review.rating %>/5</p><p class="text-gray-600"><%= review.comment %></p></div><% }) %></div></section>
+  </div>
+</div>

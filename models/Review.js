@@ -16,6 +16,11 @@ const reviewSchema = new mongoose.Schema({
     ref: "Service",
     required: true,
   },
+  booking: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Booking",
+    required: true,
+  },
   rating: {
     type: Number,
     required: true,
@@ -54,7 +59,7 @@ const reviewSchema = new mongoose.Schema({
   },
   verified: {
     type: Boolean,
-    default: true,
+    default: false,
   },
   createdAt: {
     type: Date,
@@ -62,5 +67,10 @@ const reviewSchema = new mongoose.Schema({
     index: true,
   },
 });
+
+reviewSchema.index(
+  { booking: 1 },
+  { unique: true, partialFilterExpression: { booking: { $exists: true } } },
+);
 
 module.exports = mongoose.model("Review", reviewSchema);

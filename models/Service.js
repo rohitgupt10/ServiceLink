@@ -64,7 +64,7 @@ const serviceSchema = new mongoose.Schema({
   },
   thumbnail: {
     type: String,
-    default: "https://via.placeholder.com/400x300",
+    default: "/images/service-placeholder.svg",
   },
   createdAt: {
     type: Date,
@@ -73,6 +73,10 @@ const serviceSchema = new mongoose.Schema({
   updatedAt: {
     type: Date,
     default: Date.now,
+  },
+  deletedAt: {
+    type: Date,
+    default: null,
   },
 });
 serviceSchema.index({

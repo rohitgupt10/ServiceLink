@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 600" role="img" aria-labelledby="title">
+  <title id="title">ServiceLink image placeholder</title>
+  <rect width="900" height="600" fill="#e6f7f4"/>
+  <path d="M0 470 220 275l145 128 135-123 400 320H0Z" fill="#b9e8e1"/>
+  <circle cx="680" cy="160" r="72" fill="#2ec1ac" opacity=".75"/>
+  <text x="450" y="530" text-anchor="middle" fill="#228576" font-family="Arial, sans-serif" font-size="44" font-weight="700">ServiceLink</text>
+</svg>

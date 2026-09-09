@@ -2,12 +2,17 @@
   "name": "servicelink",
   "version": "2.0.0",
   "description": "A comprehensive service booking and management platform",
-  "main": "index.js",
+  "main": "server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "node --test",
     "start": "node server.js",
-    "dev": "nodemon server.js",
+    "dev": "nodemon scripts/start-local.js",
+    "dev:atlas": "nodemon server.js",
+    "start:local": "node scripts/start-local.js",
+    "dev:local": "nodemon scripts/start-local.js",
     "seed:services": "node seed-services.js",
+    "images:cache": "node cache-images.js",
+    "admin:create": "node create-admin.js",
     "build:css": "tailwindcss -i ./public/css/input.css -o ./public/css/output.css --minify",
     "watch:css": "tailwindcss -i ./public/css/input.css -o ./public/css/output.css --watch"
   },
@@ -17,7 +22,6 @@
   "type": "commonjs",
   "dependencies": {
     "bcrypt": "^6.0.0",
-    "bcryptjs": "^3.0.2",
     "connect-mongo": "^5.1.0",
     "dotenv": "^17.2.1",
     "ejs": "^3.1.10",
@@ -31,6 +35,7 @@
   "devDependencies": {
     "@tailwindcss/cli": "^4.3.3",
     "autoprefixer": "^10.4.21",
+    "mongodb-memory-server": "^10.4.3",
     "postcss": "^8.5.6",
     "tailwindcss": "^4.1.11"
   }
